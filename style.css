@@ -1,0 +1,25 @@
+body {
+    font-family: 'Courier New', monospace;
+    background-color: #1a1a1a;
+    color: #00ff00;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-transform: uppercase;
+    border-bottom: 2px solid #00ff00;
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+#entries {
+    text-align: left;
+    max-width: 600px;
+    margin: auto;
+    background: #111;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #00ff00;
+}
