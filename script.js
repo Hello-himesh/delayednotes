@@ -1,33 +1,41 @@
-async function getEntries() {
-    try {
-        // Fetch the list of entries from entries.json
-        const respo = await fetch('entries.json');
-        const data = await respo.json();
-        const entries = data.entries.reverse(); // Show newest first
+document.addEventListener("DOMContentLoaded", function () {
+    const entriesContainer = document.getElementById("entries");
+    entriesContainer.innerHTML = "<p>Loading journal entries...</p>";
 
-        const entriesdiv = document.getElementById('entries');
-        entriesdiv.innerHTML = ''; // Clear previous content
+    async function fetchJournalEntries() {
+        try {
+            // Fetch the list of files from "noto_entries/" folder
+            const response = await fetch("noto_entries/");
+            if (!response.ok) throw new Error("Failed to fetch file list");
 
-        for (let file of entries) { // Use "of" instead of "in"
-            const entryrespo = await fetch(`noto_entries/${file}`);
-            if (!entryrespo.ok) continue; // Skip missing files
+            const text = await response.text();
+            console.log("Fetched directory list:", text); // Debugging
 
-            const entrytext = await entryrespo.text();
+            // Extract Markdown filenames using regex
+            const filesArray = [...text.matchAll(/href="([^"]+\.md)"/g)].map(match => match[1]);
+            console.log("Filtered Markdown files:", filesArray); // Debugging
 
-            // Format Markdown-style titles
-            const formatedtext = entrytext
-                .replace(/^# (.*?)$/gm, '<h2>$1</h2>') // Convert # Title to <h2>
-                .replace(/\n/g, '<br>'); // Convert line breaks
+            if (filesArray.length === 0) {
+                entriesContainer.innerHTML = "<p>No journal entries found.</p>";
+                return;
+            }
 
-            const entrydiv = document.createElement('div');
-            entrydiv.innerHTML = formatedtext;
-            entrydiv.style.marginBottom = "20px";
+            // Load and display each journal entry
+            let contentHTML = "";
+            for (let file of filesArray) {
+                const fileResponse = await fetch(`noto_entries/${file}`);
+                if (!fileResponse.ok) continue;
 
-            entriesdiv.appendChild(entrydiv);
+                const entryText = await fileResponse.text();
+                contentHTML += `<div class="entry"><h3>${file.replace(".md", "")}</h3><pre>${entryText}</pre></div>`;
+            }
+
+            entriesContainer.innerHTML = contentHTML || "<p>No valid entries found.</p>";
+        } catch (error) {
+            console.error("Error fetching journal entries:", error);
+            entriesContainer.innerHTML = "<p>Error loading journal entries.</p>";
         }
-    } catch (error) {
-        console.error("Error loading journal", error);
     }
-}
 
-window.onload = getEntries;
+    fetchJournalEntries();
+});
