@@ -4,19 +4,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchJournalEntries() {
         try {
-            // Fetch the list of journal entries from entries.json
             const response = await fetch("entries.json");
             if (!response.ok) throw new Error("Failed to fetch entries.json");
 
-            const filesArray = await response.json();
+            const data = await response.json();
+            const filesArray = data.entries; // Fix: Access the correct array
+
             console.log("Journal entries:", filesArray); // Debugging
 
-            if (filesArray.length === 0) {
+            if (!Array.isArray(filesArray) || filesArray.length === 0) {
                 entriesContainer.innerHTML = "<p>No journal entries found.</p>";
                 return;
             }
 
-            // Load and display each journal entry
             let contentHTML = "";
             for (let file of filesArray) {
                 const fileResponse = await fetch(`noto_entries/${file}`);
