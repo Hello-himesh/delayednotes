@@ -4,39 +4,33 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchJournalEntries() {
         try {
-            // Step 1: Fetch the JSON file
-            const response = await fetch("entries.json");
-            if (!response.ok) throw new Error("Failed to load journal entries");
+            // Fetch the list of files from "noto_entries/" folder
+            const response = await fetch("noto_entries/");
+            if (!response.ok) throw new Error("Failed to fetch file list");
 
-            // Step 2: Parse JSON data
-            const data = await response.json();
-            const entries = data.entries; // Extract the list of entries
+            const text = await response.text();
+            console.log("Fetched directory list:", text); // Debugging
 
-            if (entries.length === 0) {
+            // Extract Markdown filenames using regex
+            const filesArray = [...text.matchAll(/href="([^"]+\.md)"/g)].map(match => match[1]);
+            console.log("Filtered Markdown files:", filesArray); // Debugging
+
+            if (filesArray.length === 0) {
                 entriesContainer.innerHTML = "<p>No journal entries found.</p>";
                 return;
             }
 
-            // Step 3: Fetch each Markdown file and display it
+            // Load and display each journal entry
             let contentHTML = "";
-            for (let entry of entries) {
-                const fileResponse = await fetch(entry.file);
+            for (let file of filesArray) {
+                const fileResponse = await fetch(`noto_entries/${file}`);
                 if (!fileResponse.ok) continue;
 
                 const entryText = await fileResponse.text();
-
-                // Step 4: Display each journal entry
-                contentHTML += `
-                    <div class="entry">
-                        <h3>${entry.title} (${entry.date})</h3>
-                        <pre>${entryText}</pre>
-                    </div>
-                `;
+                contentHTML += `<div class="entry"><h3>${file.replace(".md", "")}</h3><pre>${entryText}</pre></div>`;
             }
 
-            // Step 5: Update the page with the entries
             entriesContainer.innerHTML = contentHTML || "<p>No valid entries found.</p>";
-
         } catch (error) {
             console.error("Error fetching journal entries:", error);
             entriesContainer.innerHTML = "<p>Error loading journal entries.</p>";
