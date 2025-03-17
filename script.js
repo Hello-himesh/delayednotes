@@ -4,17 +4,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function fetchJournalEntries() {
         try {
-            // Fetch the list of files from "noto_entries/" folder
+            // Fetch the list of journal entries from entries.json
             const response = await fetch("entries.json");
-            if (!response.ok) throw new Error("Failed to fetch file list");
+            if (!response.ok) throw new Error("Failed to fetch entries.json");
 
-            const text = await response.text();
-            console.log("Fetched directory list:", text); // Debugging
-
-            // Extract Markdown filenames using regex
             const filesArray = await response.json();
-            console.log("Journal entries:", filesArray);
-             // Debugging
+            console.log("Journal entries:", filesArray); // Debugging
 
             if (filesArray.length === 0) {
                 entriesContainer.innerHTML = "<p>No journal entries found.</p>";
